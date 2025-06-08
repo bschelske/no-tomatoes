@@ -1,5 +1,7 @@
 use std::io;
-use std::thread::sleep;
+use std::io::Write;
+use std::sync::{Arc, Mutex};
+use std::thread;
 use std::time::{Duration, Instant};
 
 struct Timer {
@@ -11,18 +13,23 @@ struct Timer {
 
 impl Timer {
     fn start(&mut self) {
-        self.active = true;
-        if self.elapsed > Duration::ZERO {
-            println!("Resuming stopwatch at {:?}", self.display)
+        if self.active == true {
+            println!("\rThe stopwatch has already started");
         } else {
-            println!("stopwatch starts NOW.");
-            self.start_time = Instant::now();
+            self.active = true;
+            if self.elapsed > Duration::ZERO {
+                println!("\rResuming stopwatch at {:?}", self.display);
+                self.start_time = Instant::now();
+            } else {
+                println!("\rstopwatch starts NOW.");
+                self.start_time = Instant::now();
+            }
         }
     }
 
     fn pause(&mut self) {
         if self.active == false {
-            println!("Timer is already paused.");
+            println!("\rTimer is already paused.");
             self.status()
         } else {
             self.active = false;
@@ -34,49 +41,41 @@ impl Timer {
 
     fn clear(&mut self) {
         self.active = false;
-        println!("Timer cleared at {:?}", self.display);
+        println!("\rTimer cleared at {:?}", self.display);
         self.elapsed = Duration::ZERO;
         self.display = Duration::ZERO;
     }
 
     fn status(&self) {
-        println!("Stopwatch: {:?}", self.display)
+        println!("\rStopwatch: {:?}", self.display);
     }
 }
 
-fn timer_testing(mut timer: Timer) {
-    timer.start();
-    println!("Start the timer!");
-    timer.status();
-
-    println!("wait a sec");
-    sleep(Duration::from_secs(1));
-    timer.pause();
-
-    println!("Done pausing");
-    timer.status();
-
-    println!("Lets start it up again!");
-    timer.start();
-    timer.status();
-
-    println!("wait a half sec");
-    sleep(Duration::from_millis(500));
-    timer.status();
-    timer.clear();
-    println!("All clear");
-    timer.status();
-}
-
 fn main() {
-    let mut timer = Timer {
+    let timer = Arc::new(Mutex::new(Timer {
         active: false,
         start_time: Instant::now(),
         elapsed: Duration::ZERO,
         display: Duration::ZERO,
-    };
+    }));
 
-    // timer_testing(timer)
+    let timer_clone = Arc::clone(&timer);
+
+    thread::spawn(move || loop {
+        {
+            let timer = timer_clone.lock().unwrap();
+
+            let current_elapsed = if timer.active {
+                timer.display + timer.start_time.elapsed()
+            } else {
+                timer.display
+            };
+
+            print!("\rStopwatch: {:?}", current_elapsed);
+            io::stdout().flush().unwrap();
+        }
+        thread::sleep(Duration::from_millis(100));
+    });
 
     println!(
         r"
@@ -106,12 +105,45 @@ fn main() {
                 running = false;
                 println!("later")
             }
-            "s" => timer.start(),
-            "p" => timer.pause(),
-            "c" => timer.clear(),
+            "s" => {
+                let mut timer = timer.lock().unwrap();
+                timer.start();
+            }
+            "p" => {
+                let mut timer = timer.lock().unwrap();
+                timer.pause();
+            }
+            "c" => {
+                let mut timer = timer.lock().unwrap();
+                timer.clear();
+            }
             _ => {
-                println!("You said uhhh: {}", user_input);
+                println!("\rYou said uhhh: {}", user_input);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_timer_start_pause_clear() {
+        let mut timer = Timer {
+            active: false,
+            start_time: Instant::now(),
+            elapsed: Duration::ZERO,
+            display: Duration::ZERO,
+        };
+
+        timer.start();
+        assert!(timer.active);
+
+        timer.pause();
+        assert!(!timer.active);
+
+        timer.clear();
+        assert_eq!(timer.display, Duration::ZERO);
     }
 }
