@@ -18,7 +18,7 @@ impl Timer {
         } else {
             self.active = true;
             if self.elapsed > Duration::ZERO {
-                println!("\rResuming stopwatch at {:?}", self.display);
+                println!("\rResuming stopwatch at {}", self.format_display());
                 self.start_time = Instant::now();
             } else {
                 println!("\rstopwatch starts NOW.");
@@ -35,19 +35,28 @@ impl Timer {
             self.active = false;
             self.elapsed = self.start_time.elapsed();
             self.display += self.elapsed;
-            self.status();
+            println!("\rStopwatch paused at: {}", self.format_display());
         }
     }
 
     fn clear(&mut self) {
         self.active = false;
-        println!("\rTimer cleared at {:?}", self.display);
+        println!("\rTimer cleared at {}", self.format_display());
         self.elapsed = Duration::ZERO;
         self.display = Duration::ZERO;
     }
 
-    fn status(&self) {
-        println!("\rStopwatch: {:?}", self.display);
+    
+    fn format_display(&mut self) -> String {
+        let total_seconds = self.display.as_secs();
+        let hours = total_seconds / 3600;
+        let minutes = (total_seconds % 3600) / 60;
+        let seconds = total_seconds % 60;
+        format!("{:02}:{:02}:{:02}", hours, minutes, seconds)
+    }
+
+    fn status(&mut self) {
+        println!("\rStopwatch: {}", self.format_display());
     }
 }
 
@@ -70,8 +79,12 @@ fn main() {
             } else {
                 timer.display
             };
-
-            print!("\rStopwatch: {:?}", current_elapsed);
+            let total_seconds = current_elapsed.as_secs();
+            let hours = total_seconds / 3600;
+            let minutes = (total_seconds % 3600) / 60;
+            let seconds = total_seconds % 60;
+            let formatted_time = format!("{:02}:{:02}:{:02}", hours, minutes, seconds);
+            print!("\rStopwatch: {}", formatted_time);
             io::stdout().flush().unwrap();
         }
         thread::sleep(Duration::from_millis(100));
