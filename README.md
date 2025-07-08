@@ -1,4 +1,5 @@
 # ⏱ Rust Stopwatch 🍅🚫
+![Rust](https://img.shields.io/badge/rust-stable-orange)
 
 A simple command-line stopwatch written in Rust.  
 Built because I wanted to **learn Rust** and make something I’d *actually use* while studying.
