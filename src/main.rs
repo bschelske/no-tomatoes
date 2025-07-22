@@ -101,7 +101,7 @@ fn main() {
 "
     ); // I am obsessed with figlet. Sue me.
 
-    println!("start (s) pause (p) clear (c) quit (q)");
+    println!("start/stop (s) pause (p) clear (c) quit (q)");
 
     let mut running: bool = true;
     while running {
