@@ -24,11 +24,9 @@ It’s like a pomodoro timer — but without the pomodoro...
 
 Once running:
 
-- `s` — Start or resume the stopwatch
-- `p` — Pause and print the current time
+- `enter` — Start or pause the stopwatch
 - `c` — Clear/reset the timer
 - `q` — Quit
-- (Anything else prints a goofy echo)
 
 ---
 
@@ -37,7 +35,7 @@ Once running:
 This project started as a way to:
 - Practice core Rust concepts like `Arc`, `Mutex`, and `std::thread`
 - Handle user input and shared state in a clean way
-- Build a real tool to track focused study time — without distractions
+- Build a study tool that I actually use
 
 ---
 
