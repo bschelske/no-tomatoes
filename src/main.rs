@@ -14,7 +14,7 @@ struct Timer {
 impl Timer {
     fn start(&mut self) {
         if self.active == true {
-            println!("\rThe stopwatch has already started");
+            self.pause();
         } else {
             self.active = true;
             if self.elapsed > Duration::ZERO {
@@ -28,10 +28,7 @@ impl Timer {
     }
 
     fn pause(&mut self) {
-        if self.active == false {
-            println!("\rTimer is already paused.");
-            self.status()
-        } else {
+        {
             self.active = false;
             self.elapsed = self.start_time.elapsed();
             self.display += self.elapsed;
@@ -46,17 +43,12 @@ impl Timer {
         self.display = Duration::ZERO;
     }
 
-    
     fn format_display(&mut self) -> String {
         let total_seconds = self.display.as_secs();
         let hours = total_seconds / 3600;
         let minutes = (total_seconds % 3600) / 60;
         let seconds = total_seconds % 60;
         format!("{:02}:{:02}:{:02}", hours, minutes, seconds)
-    }
-
-    fn status(&mut self) {
-        println!("\rStopwatch: {}", self.format_display());
     }
 }
 
@@ -101,7 +93,7 @@ fn main() {
 "
     ); // I am obsessed with figlet. Sue me.
 
-    println!("start/stop (s) pause (p) clear (c) quit (q)");
+    println!("start/stop (enter) clear (c) quit (q)");
 
     let mut running: bool = true;
     while running {
@@ -118,13 +110,9 @@ fn main() {
                 running = false;
                 println!("later")
             }
-            "s" => {
+            "" => {
                 let mut timer = timer.lock().unwrap();
                 timer.start();
-            }
-            "p" => {
-                let mut timer = timer.lock().unwrap();
-                timer.pause();
             }
             "c" => {
                 let mut timer = timer.lock().unwrap();
