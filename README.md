@@ -1,4 +1,4 @@
-# ⏱ Rust Stopwatch 🍅🚫
+# ⏱ No Tomatoes: a Rust Stopwatch 🍅🚫
 ![Rust](https://img.shields.io/badge/rust-stable-orange)
 
 A simple command-line stopwatch written in Rust.  
